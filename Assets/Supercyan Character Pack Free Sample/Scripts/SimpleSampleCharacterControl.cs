@@ -115,7 +115,7 @@ public class SimpleSampleCharacterControl : MonoBehaviour
 
     private void FixedUpdate()
     {
-        m_animator.SetBool("Grounded", m_isGrounded);
+        m_animator.SetBool("Grounded", true);
 
         switch (m_controlMode)
         {
