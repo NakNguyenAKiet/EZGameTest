@@ -19,12 +19,12 @@ public class FieldOfViewEditor : Editor
 
         if (fov.CanSeeObjectInView)
         {
-            foreach (var target in fov.VisibleTargets)
-            {
-                Handles.color = Color.green;
-                Handles.DrawLine(fov.transform.position, target.position);
+            //foreach (var target in fov.VisibleTargets)
+            //{
+            //    Handles.color = Color.green;
+            //    Handles.DrawLine(fov.transform.position, target.position);
 
-            }
+            //}
         }
     }
 

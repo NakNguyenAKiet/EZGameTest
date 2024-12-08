@@ -14,12 +14,15 @@ public class ObstacleSpawner : MonoBehaviour
 
     private List<ObstacleSpawned> objectPool = new List<ObstacleSpawned>();
     private Vector3 spawnStartPosition => startSpawnPos.transform.position;
+
+    public List<ObstacleSpawned> ObjectPool { get => objectPool;}
+
     private List<Vector3> spawnedPositions = new List<Vector3>();
 
     void Start()
     {
         InitializePool();
-        SpawnObstacles();
+        //SpawnObstacles();
     }
 
     private void Update()
@@ -30,30 +33,35 @@ public class ObstacleSpawner : MonoBehaviour
             SpawnObstacles();
         }
     }
-
+    public void Respawn()
+    {
+        ResetAllObstacles();
+        SpawnObstacles();
+    }
     void InitializePool()
     {
         for (int i = 0; i < poolSize; i++)
         {
             ObstacleSpawned obj = Instantiate(obstaclePrefab, transform);
             obj.gameObject.SetActive(false);
-            objectPool.Add(obj);
+            ObjectPool.Add(obj);
         }
     }
 
     ObstacleSpawned GetPooledObject()
     {
-        foreach (ObstacleSpawned obj in objectPool)
+        foreach (ObstacleSpawned obj in ObjectPool)
         {
             if (!obj.gameObject.activeInHierarchy)
             {
+                obj.transform.SetParent(transform);
                 return obj;
             }
         }
 
         ObstacleSpawned newObj = Instantiate(obstaclePrefab);
         newObj.gameObject.SetActive(false);
-        objectPool.Add(newObj);
+        ObjectPool.Add(newObj);
         return newObj;
     }
 
@@ -104,7 +112,7 @@ public class ObstacleSpawner : MonoBehaviour
 
     public void ResetAllObstacles()
     {
-        foreach (ObstacleSpawned obj in objectPool)
+        foreach (ObstacleSpawned obj in ObjectPool)
         {
             obj.gameObject.SetActive(false);
         }

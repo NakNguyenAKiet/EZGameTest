@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc0a15960f1ef148b3c88924a5ddbf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agent: {fileID: 0}
+  navMeshAgent: {fileID: 5779331738126398341}
   targetPoint: {x: 0, y: 0, z: 0}
   radius: 7
   moveInterval: 2

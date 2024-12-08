@@ -7,7 +7,9 @@ using static UnityEngine.UI.Image;
 public class FieldOfView : MonoBehaviour
 {
     private Mesh mesh;
+    private float timeCheck = 0.2f;
     private List<Transform> visibleTargets = new List<Transform>();
+    
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private MeshRenderer meshRender;
 
@@ -30,7 +32,7 @@ public class FieldOfView : MonoBehaviour
 
     private IEnumerator FOVRoutine()
     {
-        WaitForSeconds wait = new WaitForSeconds(0.2f);
+        WaitForSeconds wait = new WaitForSeconds(timeCheck);
 
         while (true)
         {
@@ -88,24 +90,55 @@ public class FieldOfView : MonoBehaviour
         float angleRad = angle * Mathf.Deg2Rad;
         return new Vector3(Mathf.Sin(angleRad), 0, Mathf.Cos(angleRad));  // Vector trong mặt phẳng XZ
     }
+    private List<AnimalObstacle> animalsInView = new List<AnimalObstacle>();
+    private List<AnimalObstacle> lastAnimalsInView = new List<AnimalObstacle>();
 
     private void CheckObjectsInView()
     {
-        visibleTargets.Clear();
+        animalsInView.Clear();
+
+        // Tìm tất cả vật trong bán kính quan sát
         Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewDistance, layerMask);
 
         foreach (Collider target in targetsInViewRadius)
         {
-            Transform targetTransform = target.transform;
-            Vector3 directionToTarget = (targetTransform.position - transform.position).normalized;
-
-            // Kiểm tra nếu góc giữa hướng nhân vật và vật trong khoảng fov / 2
-            if (Vector3.Angle(transform.forward, directionToTarget) < fov / 2)
+            AnimalObstacle animal = target.GetComponent<AnimalObstacle>();
+            if (animal != null)
             {
-                if(!visibleTargets.Contains(targetTransform))
-                visibleTargets.Add( targetTransform );
+                Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+
+                if (Vector3.Angle(transform.forward, directionToTarget) < fov / 2)
+                {
+                    // Vật chưa được thêm vào danh sách hiện tại
+                    if (!animalsInView.Contains(animal))
+                    {
+                        animalsInView.Add(animal);
+
+                        // Gọi sự kiện nếu vật vừa vào vùng nhìn
+                        if (!lastAnimalsInView.Contains(animal))
+                        {
+                            animal.OnEnterPlayerView();
+                        }
+                    }
+                }
             }
         }
-        canSeeObjectInView = visibleTargets.Count > 0;
+
+        // Kiểm tra vật ra khỏi vùng nhìn
+        foreach (var animal in lastAnimalsInView)
+        {
+            if (!animalsInView.Contains(animal))
+            {
+                animal.OnExitPlayerView();
+            }
+        }
+
+        // Cập nhật danh sách cuối cùng
+        lastAnimalsInView.Clear();
+        lastAnimalsInView.AddRange(animalsInView);
+
+        canSeeObjectInView = animalsInView.Count > 0;
     }
+
+
 }

@@ -5,21 +5,14 @@ using UnityEngine.AI;
 
 public class AnimalObstacle : ObstacleSpawned
 {
-    public NavMeshAgent agent;       // NavMeshAgent for character movement
+    public NavMeshAgent navMeshAgent;       // NavMeshAgent for character movement
     public Vector3 targetPoint;    // Center point (position A) for movement
     public float radius = 3f;        // Radius for the movement area
     public float moveInterval = 2f;  // Time interval between movements (2 seconds)
-
     private float timer; // Timer for tracking movement intervals
 
     void Start()
     {
-        // Automatically get the NavMeshAgent if not assigned
-        if (agent == null)
-        {
-            agent = GetComponent<NavMeshAgent>();
-        }
-
         // Initialize the timer
         timer = moveInterval;
     }
@@ -34,7 +27,52 @@ public class AnimalObstacle : ObstacleSpawned
             MoveToRandomPoint(); // Move to a random point
             timer = 0f; // Reset the timer
         }
+
+        if (isInView)
+        {
+            timeInView += Time.deltaTime;
+        }
+        if (timeInView >= requiredTimeInView)
+        {
+            OnPlayerPickUp();
+            timeInView = 0f; // Đặt lại thời gian theo dõi
+        }
     }
+
+    public void AllowTomove(bool isAllow)
+    {
+        navMeshAgent.enabled = isAllow;
+    }
+
+    #region OnPlayerView Handle
+
+    private bool isInView = false;
+    private float timeInView = 0f;
+    private float requiredTimeInView = 2f;
+
+    public void OnEnterPlayerView()
+    {
+        Debug.Log($"{gameObject.name} đã vào vùng nhìn.");
+        isInView = true;
+        timeInView = 0f;
+    }
+
+    public void OnExitPlayerView()
+    {
+        Debug.Log($"{gameObject.name} đã ra khỏi vùng nhìn.");
+        isInView = false;
+        timeInView = 0f; // Đặt lại thời gian theo dõi
+    }
+
+    public void OnPlayerPickUp()
+    {
+        Debug.Log($"{gameObject.name} đã được nhặt!");
+        // Xử lý logic nhặt vật
+
+        MyGameEvent.Instance.PickUpAnimal(this);
+        AllowTomove(false);
+    }
+    #endregion OnPlayerView Handle
 
     void MoveToRandomPoint()
     {
@@ -44,7 +82,8 @@ public class AnimalObstacle : ObstacleSpawned
         // If a valid point is found on the NavMesh
         if (randomPoint != Vector3.zero)
         {
-            agent.SetDestination(randomPoint); // Move to the point
+            if(navMeshAgent.enabled)
+            navMeshAgent.SetDestination(randomPoint); // Move to the point
         }
     }
 
@@ -67,6 +106,7 @@ public class AnimalObstacle : ObstacleSpawned
         base.OnSpwaned(pos);
         targetPoint = pos;
         DoRotateY();
+        AllowTomove(true);
     }
     void DoRotateY()
     {
