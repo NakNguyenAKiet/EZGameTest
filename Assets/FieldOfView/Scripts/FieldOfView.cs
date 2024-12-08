@@ -6,30 +6,28 @@ using static UnityEngine.UI.Image;
 
 public class FieldOfView : MonoBehaviour
 {
-    [SerializeField] private LayerMask layerMask;
     private Mesh mesh;
+    private List<Transform> visibleTargets = new List<Transform>();
+    [SerializeField] private LayerMask layerMask;
+    [SerializeField] private MeshRenderer meshRender;
 
     [Range(0, 360)]
     [SerializeField] private float fov = 90f;
     [SerializeField] private float viewDistance = 50f;
-    public bool canSeeObjectInView;
+    private bool canSeeObjectInView;
 
-    public List<Transform> visibleTargets = new List<Transform>();
-
+    public bool CanSeeObjectInView => canSeeObjectInView;
+    public List<Transform> VisibleTargets => visibleTargets;
     public float ViewDistance { get => viewDistance; set => viewDistance = value; }
     public float Fov { get => fov; set => fov = value; }
-    public Transform CurrentTarget;
     private void Start()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         StartCoroutine(FOVRoutine());
-    }
-
-    private void LateUpdate()
-    {
         DrawFieldOfView();
     }
+
     private IEnumerator FOVRoutine()
     {
         WaitForSeconds wait = new WaitForSeconds(0.2f);
@@ -38,7 +36,7 @@ public class FieldOfView : MonoBehaviour
         {
             yield return wait;
             CheckObjectsInView();
-
+            meshRender.enabled = canSeeObjectInView;
         }
     }
 
@@ -91,11 +89,6 @@ public class FieldOfView : MonoBehaviour
         return new Vector3(Mathf.Sin(angleRad), 0, Mathf.Cos(angleRad));  // Vector trong mặt phẳng XZ
     }
 
-
-    private float GetStartingAngle()
-    {
-        return transform.eulerAngles.y + Fov / 2f;
-    }
     private void CheckObjectsInView()
     {
         visibleTargets.Clear();
@@ -109,13 +102,10 @@ public class FieldOfView : MonoBehaviour
             // Kiểm tra nếu góc giữa hướng nhân vật và vật trong khoảng fov / 2
             if (Vector3.Angle(transform.forward, directionToTarget) < fov / 2)
             {
-                float distanceToTarget = Vector3.Distance(transform.position, targetTransform.position);
-
-                Debug.Log($"Vật trong vùng nhìn: {targetTransform.name}");
-                CurrentTarget = targetTransform;
-                if(!visibleTargets.Contains(CurrentTarget))
+                if(!visibleTargets.Contains(targetTransform))
                 visibleTargets.Add( targetTransform );
             }
         }
+        canSeeObjectInView = visibleTargets.Count > 0;
     }
 }
