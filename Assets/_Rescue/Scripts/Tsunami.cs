@@ -10,12 +10,20 @@ public class Tsunami : MonoBehaviour
 
     private Rigidbody rb;
     private Vector3 velocity;
+    private Vector3 originPos;
+    private void Awake()
+    {
+        originPos = transform.position;
+    }
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-
+    }
+    public void StartMove(float speedMultiply)
+    {
+        transform.position = originPos;
         velocity = (pointB.position - pointA.position) / duration;
-
+        velocity += velocity*speedMultiply;
         transform.position = pointA.position;
     }
     private void FixedUpdate()
@@ -34,7 +42,8 @@ public class Tsunami : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Game over"); 
+            MyGame.Instance.OnGameOver();
+            velocity = Vector3.zero;
         }
     }
 }

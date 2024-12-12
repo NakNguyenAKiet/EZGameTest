@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class AnimalObstacle : ObstacleSpawned
 {
@@ -10,11 +11,14 @@ public class AnimalObstacle : ObstacleSpawned
     public float radius = 3f;        // Radius for the movement area
     public float moveInterval = 2f;  // Time interval between movements (2 seconds)
     private float timer; // Timer for tracking movement intervals
+    [SerializeField] Slider slider;
+    [SerializeField] ParticleSystem dirtParticle;
 
     void Start()
     {
         // Initialize the timer
         timer = moveInterval;
+        slider.gameObject.SetActive(false);
     }
 
     void Update()
@@ -31,6 +35,7 @@ public class AnimalObstacle : ObstacleSpawned
         if (isInView)
         {
             timeInView += Time.deltaTime;
+            slider.value = timeInView / requiredTimeInView;
         }
         if (timeInView >= requiredTimeInView)
         {
@@ -52,6 +57,8 @@ public class AnimalObstacle : ObstacleSpawned
 
     public void OnEnterPlayerView()
     {
+        slider.gameObject.SetActive(true);
+
         Debug.Log($"{gameObject.name} đã vào vùng nhìn.");
         isInView = true;
         timeInView = 0f;
@@ -59,6 +66,8 @@ public class AnimalObstacle : ObstacleSpawned
 
     public void OnExitPlayerView()
     {
+        slider.gameObject.SetActive(false);
+
         Debug.Log($"{gameObject.name} đã ra khỏi vùng nhìn.");
         isInView = false;
         timeInView = 0f; // Đặt lại thời gian theo dõi
@@ -66,6 +75,10 @@ public class AnimalObstacle : ObstacleSpawned
 
     public void OnPlayerPickUp()
     {
+        dirtParticle.Stop();
+
+        slider.gameObject.SetActive(false);
+
         Debug.Log($"{gameObject.name} đã được nhặt!");
         // Xử lý logic nhặt vật
 
@@ -107,6 +120,8 @@ public class AnimalObstacle : ObstacleSpawned
         targetPoint = pos;
         DoRotateY();
         AllowTomove(true);
+        navMeshAgent.speed = MyGame.Instance.GameData.CurrentAnimalSpeed;
+        dirtParticle.Play();
     }
     void DoRotateY()
     {

@@ -35,6 +35,7 @@ public class ObstacleSpawner : MonoBehaviour
     }
     public void Respawn()
     {
+        numberOfObstacles = MyGame.Instance.GameData.NumberOfObstacle;
         ResetAllObstacles();
         SpawnObstacles();
     }

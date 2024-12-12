@@ -24,6 +24,7 @@ public class SimpleSampleCharacterControl : MonoBehaviour
     [SerializeField] private Rigidbody m_rigidBody = null;
 
     [SerializeField] private ControlMode m_controlMode = ControlMode.Direct;
+    [SerializeField] private ParticleSystem upgradeParticle;
 
     private float m_currentV = 0;
     private float m_currentH = 0;
@@ -47,6 +48,24 @@ public class SimpleSampleCharacterControl : MonoBehaviour
         if (!m_animator) { gameObject.GetComponent<Animator>(); }
     }
 
+    private void Start()
+    {
+        MyGameEvent.Instance.OnUpgradeSpeed += OnUpgradeSpeed;
+    }
+    private void OnDestroy()
+    {
+        MyGameEvent.Instance.OnUpgradeSpeed -= OnUpgradeSpeed;
+    }
+
+    void OnUpgradeSpeed(float speed)
+    {
+        upgradeParticle.Play();
+        SetPlayerSpeed(speed);
+    }
+    public void SetPlayerSpeed(float speed)
+    {
+        m_moveSpeed = speed;
+    }
     private void OnCollisionEnter(Collision collision)
     {
         ContactPoint[] contactPoints = collision.contacts;
