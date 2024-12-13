@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using TTHUnityBase.Base.DesignPattern;
 using UnityEngine;
 using UnityEngine.Playables;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class GameManager : MonoBehaviour
 {
