@@ -19,13 +19,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] UIManager uIManager;
     [SerializeField] Transform playerSpawnPos;
     [SerializeField] SimpleSampleCharacterControl playerControl;
+    [SerializeField] PlayerInventories playerInventories;
 
     GameData gameData;
     string gameDataKey = "gameDataKey";
 
     private int pickedUpAnimalCount = 0;
+    private int cashReward = 0;
     public GameConfig GameConfig { get => gameConfig;}
     public GameData GameData { get => gameData;}
+    public int PickedUpAnimalCount { get => pickedUpAnimalCount;}
+    public int CashReward { get => cashReward;}
 
     private void Awake()
     {
@@ -33,38 +37,50 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
-        uIManager.InitUIData(gameData.Cash, gameData.CurrentPlayerSpeed, GetUpGradeCost());
+        uIManager.InitUIData(gameData.Cash, gameData.CurrentPlayerSpeed, GetUpGradeCost(), gameData.GameLevel);
+        MyGameEvent.Instance.OnPickUpAnimal += OnPickUpAnimal;
+        ResetGame();
     }
     public void ResetGame()
+    {
+        pickedUpAnimalCount = 0;
+        playerControl.SetPlayerSpeed(0);
+        tsunami.ResetPos();
+        playerControl.transform.position = playerSpawnPos.position;
+        endPos.position = new Vector3(endPos.position.x, endPos.position.y, GetCurrentEndGameDistance());
+        playerInventories.ResetInventory();
+    }
+    public void PlayGame()
     {
         animalSpwaner.Respawn();
         decoLeftSpwaner.Respawn();
         decoRightSpwaner.Respawn();
         propsSpawner.Respawn();
-
-        pickedUpAnimalCount = 0;
-        tsunami.StartMove(GameData.CurrentTsunamiSpeedMultiplier);
         playerControl.SetPlayerSpeed(GameData.CurrentPlayerSpeed);
-        playerControl.transform.position = playerSpawnPos.position;
-        endPos.position = new Vector3(endPos.position.x, endPos.position.y, GetCurrentEndGameDistance());
+        tsunami.StartMove(GameData.CurrentTsunamiSpeedMultiplier);
+        MyGameEvent.Instance.UpdateAnimalCount();
+        playerInventories.ResetInventory();
     }
+
+    #region EventListener
     public void OnGameOver()
     {
-        GameData.Cash += GameConfig.CashPerAnimal * pickedUpAnimalCount;
-
+        cashReward = GameConfig.CashPerAnimal * pickedUpAnimalCount;
+        GameData.Cash += cashReward;
         MyGameEvent.Instance.GameOver();
         SaveGameData();
     }
     public void OnCompleteLevel()
     {
-        GameData.GameLevel += 1;
-        GameData.Cash += GameConfig.CashPerAnimal * pickedUpAnimalCount;
+        cashReward = GameConfig.CashPerAnimal * pickedUpAnimalCount;
+        GameData.Cash += cashReward;
         GameData.NumberOfObstacle = GameConfig.NumberOfObstacle + GameData.GameLevel;
         GameData.CurrentAnimalSpeed = GameConfig.AnimalSpeed + (GameConfig.AnimalSpeed * GameConfig.AnimalSpeedMultiplier * GameData.GameLevel);
         GameData.CurrentTsunamiSpeedMultiplier = GameConfig.TsunamiSpeedMultiplier * GameData.GameLevel;
 
+        GameData.GameLevel += 1;
         MyGameEvent.Instance.CompleteLevel();
-
+        ResetGame();
         SaveGameData();
     }
     public void OnUpgradePlayerSpeed()
@@ -74,11 +90,17 @@ public class GameManager : MonoBehaviour
         gameData.Cash -= GetUpGradeCost();
         gameData.CurrentPlayerSpeed += GameConfig.PlayerSpeedMultiplier;
         gameData.CurrentSpeedUpgradeLevel += 1;
-        uIManager.InitUIData(gameData.Cash, gameData.CurrentPlayerSpeed, GetUpGradeCost());
+        uIManager.InitUIData(gameData.Cash, gameData.CurrentPlayerSpeed, GetUpGradeCost(), gameData.GameLevel);
 
         SaveGameData();
         MyGameEvent.Instance.UpgradeSpeed(gameData.CurrentPlayerSpeed);
     }
+    void OnPickUpAnimal(AnimalObstacle animalObstacle)
+    {
+        pickedUpAnimalCount++;
+        MyGameEvent.Instance.UpdateAnimalCount();
+    }
+    #endregion EventListener
     void LoadGameData()
     {
         if(PlayerPrefs.HasKey(gameDataKey))
@@ -115,16 +137,14 @@ public class GameManager : MonoBehaviour
     {
         if (GameData.GameLevel == 1) return gameConfig.EndgameDistance;
 
-        return gameConfig.EndgameDistance + (GameConfig.EndgameDistance * GameConfig.TsunamiSpeedMultiplier * GameData.GameLevel);
+        //addition distance = 5
+        return gameConfig.EndgameDistance + (GameConfig.EndgameDistance * GameConfig.TsunamiSpeedMultiplier * GameData.GameLevel) +5;
     }
-
-    private void Update()
+    public void FreeCashTest()
     {
-        //TEST
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            gameData.Cash += 1000000;
-        }
+        gameData.Cash += 1000;
+        uIManager.InitUIData(gameData.Cash, gameData.CurrentPlayerSpeed, GetUpGradeCost(), gameData.GameLevel);
+        SaveGameData();
     }
 }
 

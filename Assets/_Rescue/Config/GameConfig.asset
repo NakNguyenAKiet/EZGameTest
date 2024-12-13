@@ -13,4 +13,13 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   PlayerSpeed: 1.5
+  UpgradeCost: 100
+  PlayerSpeedMultiplier: 0.05
+  UpgradeCostMultiplier: 2
   TsunamiSpeed: 10
+  TsunamiSpeedMultiplier: 0.08
+  AnimalSpeed: 1.5
+  AnimalSpeedMultiplier: 0.15
+  EndgameDistance: 40
+  NumberOfObstacle: 4
+  CashPerAnimal: 50

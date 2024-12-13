@@ -19,6 +19,11 @@ public class Tsunami : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
     }
+    public void ResetPos()
+    {
+        velocity = Vector3.zero;
+        transform.position = originPos;
+    }
     public void StartMove(float speedMultiply)
     {
         transform.position = originPos;

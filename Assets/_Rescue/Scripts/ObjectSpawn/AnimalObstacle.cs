@@ -53,7 +53,7 @@ public class AnimalObstacle : ObstacleSpawned
 
     private bool isInView = false;
     private float timeInView = 0f;
-    private float requiredTimeInView = 2f;
+    private float requiredTimeInView = 1.4f;
 
     public void OnEnterPlayerView()
     {

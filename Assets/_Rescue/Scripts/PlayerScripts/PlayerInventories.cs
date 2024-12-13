@@ -9,10 +9,7 @@ public class PlayerInventories : MonoBehaviour
     {
         MyGameEvent.Instance.OnPickUpAnimal += OnPickUpAnimal;
     }
-    private void Start()
-    {
-        ResetInventory();
-    }
+
     public void ResetInventory()
     {
         foreach (var slot in inventorySlots)

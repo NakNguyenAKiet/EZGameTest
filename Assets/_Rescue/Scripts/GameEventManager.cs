@@ -14,6 +14,8 @@ public class GameEventManager
 
     public event Action OnGameOver;
     public void GameOver() => OnGameOver.Invoke();
+    public event Action OnUpdateAnimalCount;
+    public void UpdateAnimalCount() => OnUpdateAnimalCount.Invoke();
 }
 
 public class MyGameEvent: Singleton <GameEventManager>

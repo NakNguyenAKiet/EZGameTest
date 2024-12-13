@@ -11,6 +11,7 @@ public class ObstacleSpawner : MonoBehaviour
     public float areaHeight = 40f;
     public float minDistance = 6f;
     public float maxDistance = 8f;
+    public bool isDeco = false;
 
     private List<ObstacleSpawned> objectPool = new List<ObstacleSpawned>();
     private Vector3 spawnStartPosition => startSpawnPos.transform.position;
@@ -35,7 +36,10 @@ public class ObstacleSpawner : MonoBehaviour
     }
     public void Respawn()
     {
+        if(!isDeco)
         numberOfObstacles = MyGame.Instance.GameData.NumberOfObstacle;
+        //minDistance = originminDistance + MyGame.Instance.GameData.GameLevel;
+        //maxDistance = originmaxDistance + MyGame.Instance.GameData.GameLevel;
         ResetAllObstacles();
         SpawnObstacles();
     }
